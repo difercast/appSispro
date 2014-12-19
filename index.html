@@ -1,0 +1,172 @@
+<!DOCTYPE html> 
+<html>
+<head>
+<meta charset="utf-8">
+<title>Sisprocompu</title>
+<link href="jquery-mobile/jquery.mobile-1.0.min.css" rel="stylesheet" type="text/css"/>
+<link rel="stylesheet" href="css/sispro.css" />
+<script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
+<script src="jquery-mobile/jquery-1.6.4.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="js/jquery-validation-1.12.0/dist/jquery.validate.min.js"></script>
+<script type="text/javascript" src="js/validarCI.js"></script>
+<script src="jquery-mobile/jquery.mobile-1.0.min.js" type="text/javascript"></script>
+</head> 
+<body> 
+
+<!--Página princpipal-->
+<div data-role="page" id="home" data-theme="c">
+	<div data-role="content">
+    	<div class="logo">
+    		<h1>Sisprocompu</h1>
+        </div>
+		<div class="choice_list">
+			<h1>Para consultar el estado de tu equipo, por favor ingresa tu número de cédula<h1>
+        </div>
+        <form id="formCI" method="post" data-ajax="false">	
+   	        <input type="text" maxlength="10" name="ci"  id="ci" placeholder="Número de cédula"/>
+    	    <div data-role="controlgroup" data-type="horizontal" align="center">
+    	       <input type="submit" value="Consultar" style="font-size:14px;"/>
+    	    </div>
+        </form>
+    </div>
+</div>
+
+<!--Página Lista de órdenes-->
+<div data-role="page" data-theme="c" id="listaOrdenes">
+	<div data-role="header">
+    	<h1>Sisprocompu</h1>
+    </div>
+    <div data-role="content">
+    	<div class="contenedor">
+        	<h2 align="center">Órdenes de trabajo</h2>
+            <div id="datosCliente">
+            </div>          
+            <ul data-role="listview" data-inset="true" id="listaOrdenes">                
+            </ul>
+        </div>
+        <div data-role="controlgroup" data-type="horizontal" align="center">
+           	<a href="#home" data-role="button" data-rel="back">Regresar</a>
+        </div>
+    </div>
+</div>
+
+<!--Página Lista de órdenes-->
+<div data-role="page" data-theme="c" id="detalleOrden">
+	<div data-role="header">
+    	<h1>Sisprocompu</h1>
+    </div>
+	<div data-role="content">
+    	<div class="contenedor">
+            <div id="datosOrden">
+            </div>
+        </div> 
+        <div data-role="controlgroup" data-type="horizontal" align="center">
+            <a href="#home" data-role="button">Regresar</a>
+        </div>
+    </div>
+</div>
+
+
+<!--Página Mensaje de errores --> 
+    <div data-role="page" id="pagErrores" data-theme="c">
+        <!-- Header --> 
+        <div data-role="header">
+            <h1>Sisprocompu</h1>
+        </div>
+        <!--Content -->         
+        <div data-role="content">
+            <div class="contenedor">                
+                <h1 align="center">Error</h1>
+                <br><br>
+                <p style="color:344d5c;" align="center">Hemos encontrado un error, por vafor verifica tus datos e inténtalo en un momento, y si el problema persiste consulte al administrador del sistema</p>
+            </div>  
+            <div data-role="controlgroup" data-type="horizontal" align="center">
+            	<a href="#home" data-role="button">Regresar</a>
+            </div>          
+        </div>
+       
+    </div>
+    
+    
+</body>
+
+<!--Consulta y carga de órdenes de trabajo-->
+<script>
+$('#formCI').submit(function(){           
+    $.ajax({
+        type: "GET",
+        dataType: "jsonp",
+        contentType: "application/json",
+        async: false,
+        data: {'ci':$('#ci').val()},
+        url: "http://sisprocompu.com/consultaApp/consulta?callback=?",
+        success: function(data){                        
+            if(data.errores == false){
+                $.mobile.changePage("#listaOrdenes", { transition: "slideup", changeHash: false });
+                $('#datosCliente').empty();
+                $('ul').empty();
+                $.each(data.ordenes, function(k,v){
+                    $("ul").append('<li id="btnOrden" val="'+v+'"><a "http://sisprocompu.dev/consultaApp/orden/'+v+'?callback=?">'+v+'</a></li>').listview('refresh');
+                });
+                $('#datosCliente').append('<strong>Cliente: </strong> '+data.cliente.nombres);
+            }else{
+                 $.mobile.changePage("#pagErrores", { transition: "slideup", changeHash: false });
+            }
+        },
+        error: function(data){
+            $.mobile.changePage("#pagErrores", { transition: "slideup", changeHash: false });
+        }
+    });
+    return false;
+});
+</script>
+
+<script type="text/javascript">
+    $('ul').click(function(){         
+        datos = $('#btnOrden').text();
+         $.ajax({
+            type: "GET",
+            dataType: "jsonp",
+            data:{'orden':datos},
+            contentType: "application/json",
+            async: false,            
+            url: "http://sisprocompu.com/consultaApp/orden/?callback=?",
+            success: function(data){                        
+                console.log('éxito');
+                if(data.errores == false){
+                    console.log(data.orden);
+                    $.mobile.changePage("#detalleOrden", { transition: "slideup", changeHash: false });
+                    $('#datosOrden').empty();                    
+                    $('#datosOrden').append(
+                        '<h2 align="center" style="color:rgb(65, 38, 37);">Orden de trabajo N° '+data.orden.id+'</h2>'+
+                        '<h3 align="center">Equipo receptado en '+data.sucursal.nombre+'</h3>'+
+                        '<p><strong>Cliente:</strong>'+data.cliente.nombres+' </p>'+
+                        '<h3 style="color:rgb(65, 38, 37);"><strong>Datos del equipo</strong></h3>'+
+                            '<p><strong>Tipo: </strong>'+data.equipo.tipo+
+                            '<br><strong>Marca: </strong>'+data.equipo.marca+
+                            '<br><strong>Modelo: </strong>'+data.equipo.modelo+'</p>'+
+                        '<p><strong>Problema del equipo:</strong><br>'+data.orden.problema+'</p>'+
+                        '<p><strong>Accesorios:</strong><br>'+data.orden.accesorios+'</p>'+
+                        '<h3 style="color:rgb(65, 38, 37);">Detalles de la reparación</h3>'+
+                        '<p><strong>Detalles de la reparación:</strong><br/>'+
+                        data.detalle+'</p>'+
+                        '<p><strong>Informe sobre la reparación:</strong><br/>'+
+                        data.informe+'</p>'+
+                        '<p><strong>Estado de la reparación:</strong><br/>'+
+                        data.estado+'</p>'+
+                        '<h3 style="color:rgb(65, 38, 37);">Detalles de presupuesto</h3>'+
+                        '<p><strong>Estado de presupuesto:</strong><br>'+
+                        data.presupuesto+'<br>Valor presupuestado: '+data.valor+'</p>'
+                    );
+                }else{
+                   $.mobile.changePage("#pagErrores", { transition: "slideup", changeHash: false });                
+                }
+            },
+            error: function(data){
+                $.mobile.changePage("#pagErrores", { transition: "slideup", changeHash: false });                
+            }
+        });
+    });
+</script>
+
+</html>

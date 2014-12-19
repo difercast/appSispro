@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns = "http://www.w3.org/ns/widgets"
+    xmlns:gap = "http://phonegap.com/ns/1.0"
+    id        =  "com.phonegap.sisprocompu"
+    version   = "1.0.0">
+
+
+<name>Sisprocompu</name>
+
+    <description>
+        Administración y control de servicios de mantenimiento técnico
+    </description>
+
+<author href="http://www.difercast.wordpress.com/" email="difercast1104@gmail.com">
+        Diego Castillo 
+    </author>
+
+<icon src="logo.png" />
+<icon src="images/res/ic_launcher_ldpi.png"   gap:platform="android"    gap:density="ldpi" />
+<icon src="images/res/ic_launcher_mdpi.png"   gap:platform="android"    gap:density="mdpi" />
+<icon src="images/res/ic_launcher_hdpi.png"   gap:platform="android"    gap:density="hdpi" />
+<icon src="images/res/ic_launcher_xhdpi.png"  gap:platform="android"    gap:density="xhdpi" />
+<icon src="images/res/ic_launcher_xxhdpi.png"  gap:platform="android"    gap:density="xxhdpi" />
+
+<access origin="sisprocompu.com" />
+
+</widget>
